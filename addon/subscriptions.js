@@ -4,6 +4,8 @@ import Subscription from 'ember-action-cable/subscription';
 
 export default Ember.Object.extend({
 
+  cable: null,
+
   init() {
     this._super(...arguments);
 

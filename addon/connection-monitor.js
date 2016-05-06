@@ -5,10 +5,12 @@ const { computed } = Ember;
 
 export default Ember.Object.extend({
 
+  connection: null,
+  cable: null,
+
   init() {
     this._super(...arguments);
 
-    this.connection        = null;
     this.pollInterval      = { min: 3, max: 30 };
     this.staleThreshold    = 6;
     this.reconnectAttempts = 0;

@@ -2,13 +2,14 @@ import Ember from 'ember';
 
 export default Ember.Object.extend({
 
+  consumer: null,
+  mixin: null,
+  params: null,
+
   init() {
     this._super(...arguments);
 
-    this.consumer = null;
-    this.mixin    = null;
-
-    if (this.get('params') === null) {
+    if (!this.get('params')) {
       this.params = {};
     }
 

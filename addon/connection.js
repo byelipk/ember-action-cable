@@ -15,6 +15,7 @@ export default Ember.Object.extend({
   state:     null,
   consumer:  null,
   websocket: null,
+  cable:     null,
 
   init() {
     this._super(...arguments);
