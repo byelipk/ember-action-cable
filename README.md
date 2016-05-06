@@ -1,6 +1,8 @@
 # Ember-action-cable
 
-This README outlines the details of collaborating on this Ember addon.
+This is a work in progress.
+
+Tracking ActionCable from Rails 5.0.0.beta4
 
 ## Installation
 
