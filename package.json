@@ -1,7 +1,7 @@
 {
   "name": "ember-action-cable",
   "version": "0.0.0",
-  "description": "The default blueprint for ember-cli addons.",
+  "description": "This is a direct port of Rails/ActionCable into an Ember Addon.",
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -40,7 +40,9 @@
     "loader.js": "^4.0.1"
   },
   "keywords": [
-    "ember-addon"
+    "ember-addon",
+    "actioncable",
+    "websockets"
   ],
   "dependencies": {
     "ember-cli-babel": "^5.1.6"
