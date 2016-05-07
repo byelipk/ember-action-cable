@@ -37,8 +37,7 @@ export default Ember.Object.extend({
 
   ensureActiveConnection() {
     this.get('cable').log(`Checking WS connection...`);
-    if (!this.get('connection.isActive')) {
-      this.get('cable').log(`WS connection is ${this.get('connection.state')}. Attempting to open WS connection...`);
+    if (!this.get('connection').isActive()) {
       this.connect();
     }
   }

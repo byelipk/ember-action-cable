@@ -17,7 +17,7 @@ export default Ember.Service.extend({
 
   endpoint() {
     let ref = this.getConfig("url");
-    url = (ref !== null) ? ref : Internal.default_mount_path;
+    return (ref !== null) ? ref : Internal.default_mount_path;
   },
 
   getConfig(name) {

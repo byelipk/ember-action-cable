@@ -97,7 +97,6 @@ export default Ember.Object.extend({
 
   notifyAll(callback, ...args) {
     this.get('subscriptions').forEach((subscription) => {
-      this.get('cable').log(args);
       this.notify(subscription, callback, args);
     });
   },
@@ -147,7 +146,6 @@ export default Ember.Object.extend({
     }
 
     subscriptions.forEach((subscription) => {
-      this.get('cable').log(`Invoking ${callbackName}`, subscription.toString());
       tryInvoke(subscription, callbackName, args);
     });
   },
@@ -164,7 +162,6 @@ export default Ember.Object.extend({
    @class Subscriptions
    */
   sendCommand(subscription, command) {
-    this.get('cable').log(`Subscriptions#sendCommand: ${command}`)
     this.get('consumer').send({
       command: command,
       identifier: subscription.get('identifier')

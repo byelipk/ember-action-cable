@@ -101,11 +101,8 @@ export default Ember.Object.extend({
 
       this.incrementProperty('reconnectAttempts');
 
-      if (this.disconnectedRecently()) {
-        this.get('cable').log("ConnectionMonitor skipping reopening recent disconnect");
-      } else {
-        this.get('cable').log("ConnectionMonitor reopening");
-        this.get('consumer.connection').reopen();
+      if (!this.disconnectedRecently()) {
+        this.get('connection').reopen();
       }
     }
   },

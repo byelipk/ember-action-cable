@@ -38,23 +38,15 @@ export default Ember.Object.extend({
 
   send(data) {
     if (this.isOpen()) {
-      this.get('cable').log(`WS connection is ${this.get('state')}. Sending data...`);
-      console.log(data);
       this.get('websocket').send(JSON.stringify(data));
-    } else {
-      this.get('cable').log(`WS connection is ${this.get('state')}. Cannot send data.`);
     }
   },
 
   open() {
-    if (this.get('isActive')) {
-      this.get('cable').log(`Attempted to open WebSocket, but existing socket is ${this.get('state')}`);
-
+    if (this.isActive()) {
       throw new Ember.Error("Existing connection must be closed before opening");
 
     } else {
-      this.get('cable').log(`Opening WebSocket, current state is ${this.get('state')}}, subprotocols: ${Internal.get('protocols')}`);
-
       if (this.get('websocket')) {
         this.uninstallEventHandlers();
       }
@@ -66,12 +58,6 @@ export default Ember.Object.extend({
       this.installEventHandlers();
 
       this.get('monitor').start();
-
-
-      this.get('cable').log(`WS current state is ${this.get('state')}}`);
-
-      return true;
-
     }
   },
 
@@ -82,22 +68,19 @@ export default Ember.Object.extend({
       this.get('monitor').stop();
     }
 
-    if (this.get('isActive') && this.get('websocket')) {
+    if (this.isActive() && this.get('websocket')) {
       this.get('websocket').close();
     }
 
   },
 
   reopen() {
-    this.get('cable').log(`Reopening WebSocket, current state is ${this.get('state')}`);
-
-    if (this.get('isActive')) {
+    if (this.isActive()) {
       try {
         this.close();
       } catch (e) {
         this.get('cable').log(`Failed to reopen WebSocket`, e);
       } finally {
-        this.get('cable').log(`Reopening WebSocket in ${this.get('reopenDelay')} ms`);
         Ember.run.later(this, this.open, this.get('reopenDelay'));
       }
     } else {
@@ -109,9 +92,9 @@ export default Ember.Object.extend({
     return this.isState("OPEN");
   },
 
-  isActive: computed('state', function() {
+  isActive() {
     return this.isState("OPEN", "CONNECTING");
-  }),
+  },
 
   protocol: computed('websocket', function() {
     if (this.get('websocket')) {
@@ -143,8 +126,6 @@ export default Ember.Object.extend({
   },
 
   installEventHandlers() {
-    this.get('cable').log(`Installing event handlers on WS`);
-
     const events = this.get('events');
     const keys   = Object.keys(events);
 
@@ -161,8 +142,6 @@ export default Ember.Object.extend({
     keys.forEach((event) => {
       this.get('websocket')[`on${event}`] = null;
     });
-
-    this.get('cable').log(`Event handlers uninstalled from ws:`);
   },
 
   // NOTE
@@ -203,28 +182,23 @@ export default Ember.Object.extend({
       switch(type) {
 
         case Internal.get('messageTypes.welcome'):
-          this.get('cable').log(`Welcome message`);
           monitor.recordConnect();
           subscriptions.reload();
           break;
 
         case Internal.get('messageTypes.ping'):
-          this.get('cable').log(`Ping message`);
           monitor.recordPing();
           break;
 
         case Internal.get('messageTypes.confirmation'):
-          this.get('cable').log(`Confirmation message: ${identifier}`);
           subscriptions.notify(identifier, "connected");
           break;
 
         case Internal.get('messageTypes.rejection'):
-          this.get('cable').log(`Rejection message: ${identifier}`);
           subscriptions.reject(identifier);
           break;
 
         default:
-          this.get('cable').log(`Data message: ${identifier}`);
           subscriptions.notify(identifier, "received", message);
       }
     },
@@ -239,11 +213,11 @@ export default Ember.Object.extend({
       this.set('disconnected', true);
       this.get('monitor').recordDisconnect();
       this.get('subscriptions').notifyAll("disconnected", {
-        willAttemptReconnect: this.get('monitor').isRunning()
+        willAttemptReconnect: this.get('monitor.isRunning')
       });
     },
 
-    error() {
+    error(/*event*/) {
       this.get('cable').log("WebSocket onerror event");
     }
 
