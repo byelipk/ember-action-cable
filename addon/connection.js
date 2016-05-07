@@ -37,12 +37,13 @@ export default Ember.Object.extend({
   }),
 
   send(data) {
-    if (this.get('isOpen')) {
+    if (this.isOpen()) {
+      this.get('cable').log(`WS connection is ${this.get('state')}. Sending data...`);
+      console.log(data);
       this.get('websocket').send(JSON.stringify(data));
-      return true;
+    } else {
+      this.get('cable').log(`WS connection is ${this.get('state')}. Cannot send data.`);
     }
-
-    return false;
   },
 
   open() {
@@ -65,6 +66,9 @@ export default Ember.Object.extend({
       this.installEventHandlers();
 
       this.get('monitor').start();
+
+
+      this.get('cable').log(`WS current state is ${this.get('state')}}`);
 
       return true;
 
@@ -101,9 +105,9 @@ export default Ember.Object.extend({
     }
   },
 
-  isOpen: computed('state', function() {
+  isOpen() {
     return this.isState("OPEN");
-  }),
+  },
 
   isActive: computed('state', function() {
     return this.isState("OPEN", "CONNECTING");
@@ -139,6 +143,8 @@ export default Ember.Object.extend({
   },
 
   installEventHandlers() {
+    this.get('cable').log(`Installing event handlers on WS`);
+
     const events = this.get('events');
     const keys   = Object.keys(events);
 
@@ -153,11 +159,30 @@ export default Ember.Object.extend({
     const keys   = Object.keys(events);
 
     keys.forEach((event) => {
-      this.get('websocket')[`on${event}`] = function() {};
+      this.get('websocket')[`on${event}`] = null;
     });
+
+    this.get('cable').log(`Event handlers uninstalled from ws:`);
   },
 
+  // NOTE
+  // A WebSocket has for events we need to handle:
+  // => onmessage
+  // => onopen
+  // => onclose
+  // => onerror
   events: {
+
+    open() {
+      this.get('cable').log(`WebSocket onopen event, using '${this.get('protocol')}' subprotocol`);
+
+      this.set('disconnected', false);
+
+      if (!this.get('isProtocolSupported')) {
+        this.get('cable').log("Protocol is unsupported. Stopping monitor and disconnecting.");
+        this.close({allowReconnect: false});
+      }
+    },
 
     message(event) {
       if (!this.get('isProtocolSupported')) {
@@ -178,35 +203,29 @@ export default Ember.Object.extend({
       switch(type) {
 
         case Internal.get('messageTypes.welcome'):
+          this.get('cable').log(`Welcome message`);
           monitor.recordConnect();
           subscriptions.reload();
           break;
 
         case Internal.get('messageTypes.ping'):
+          this.get('cable').log(`Ping message`);
           monitor.recordPing();
           break;
 
         case Internal.get('messageTypes.confirmation'):
+          this.get('cable').log(`Confirmation message: ${identifier}`);
           subscriptions.notify(identifier, "connected");
           break;
 
         case Internal.get('messageTypes.rejection'):
+          this.get('cable').log(`Rejection message: ${identifier}`);
           subscriptions.reject(identifier);
           break;
 
         default:
+          this.get('cable').log(`Data message: ${identifier}`);
           subscriptions.notify(identifier, "received", message);
-      }
-    },
-
-    open() {
-      this.get('cable').log(`WebSocket onopen event, using '${this.get('protocol')}' subprotocol`);
-
-      this.set('disconnected', false);
-
-      if (!this.get('isProtocolSupported')) {
-        this.get('cable').log("Protocol is unsupported. Stopping monitor and disconnecting.");
-        this.close({allowReconnect: false});
       }
     },
 

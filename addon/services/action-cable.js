@@ -5,15 +5,19 @@ import Internal from 'ember-action-cable/internal';
 export default Ember.Service.extend({
 
   createConsumer(url) {
-    if (url === null) {
-      let ref = this.getConfig("url");
-      url = ref !== null ? ref : Internal.default_mount_path;
+    if (!url) {
+      url = this.endpoint();
     }
 
     return Consumer.create({
       url: this.createWebSocketURL(url),
       cable: this
     });
+  },
+
+  endpoint() {
+    let ref = this.getConfig("url");
+    url = (ref !== null) ? ref : Internal.default_mount_path;
   },
 
   getConfig(name) {

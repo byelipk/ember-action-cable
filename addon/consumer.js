@@ -22,22 +22,24 @@ export default Ember.Object.extend({
   },
 
   send(data) {
-    return this.get('connection').send(data);
+    this.get('connection').send(data);
   },
 
   connect() {
-    return this.get('connection').open();
+    this.get('connection').open();
   },
 
   disconnect() {
-    return this.get('connection').close({
+    this.get('connection').close({
       allowReconnect: false
     });
   },
 
   ensureActiveConnection() {
+    this.get('cable').log(`Checking WS connection...`);
     if (!this.get('connection.isActive')) {
-      return this.get('connection').open();
+      this.get('cable').log(`WS connection is ${this.get('connection.state')}. Attempting to open WS connection...`);
+      this.connect();
     }
   }
 

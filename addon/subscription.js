@@ -1,31 +1,23 @@
 import Ember from 'ember';
 
+const { computed } = Ember;
+
 export default Ember.Object.extend({
 
-  consumer: null,
-  mixin: null,
-  params: null,
+  mixin:    null,
+  params:   {},
 
-  init() {
-    this._super(...arguments);
+  identifier: computed('params', function() {
+    return JSON.stringify(this.get('params'));
+  }),
 
-    if (!this.get('params')) {
-      this.params = {};
-    }
-
-    this.identifier = JSON.stringify(this.get('params'));
-  },
-
-  perform(action, data) {
-    if (data == null) {
-      data = {};
-    }
+  perform(action, data = {}) {
     data.action = action;
     return this.send(data);
   },
 
   send(data) {
-    return this.consumer.send({
+    return this.get('consumer').send({
       command: "message",
       identifier: this.get('identifier'),
       data: JSON.stringify(data)
@@ -33,6 +25,10 @@ export default Ember.Object.extend({
   },
 
   unsubscribe() {
-    return this.get('consumer.subscriptions').remove(this);
+    return this.get('subscriptions').remove(this);
+  },
+
+  initialized() {
+    console.log("HELLO WORLD");
   }
 });
