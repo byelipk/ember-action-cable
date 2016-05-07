@@ -1,5 +1,4 @@
 import Ember from 'ember';
-import ActionCable  from 'ember-action-cable/services/action-cable';
 import Subscription from 'ember-action-cable/subscription';
 
 export default Ember.Object.extend({

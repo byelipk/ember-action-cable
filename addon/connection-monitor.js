@@ -1,5 +1,4 @@
 import Ember from 'ember';
-import ActionCable from 'ember-action-cable/services/action-cable';
 
 const { computed } = Ember;
 
